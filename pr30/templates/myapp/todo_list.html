@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Todo List</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f5f1ea;
+            --panel: #fffaf2;
+            --ink: #1f2933;
+            --muted: #65737e;
+            --accent: #2f855a;
+            --accent-dark: #276749;
+            --danger: #c53030;
+            --border: #e6dccb;
+            --shadow: 0 18px 45px rgba(31, 41, 51, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Georgia, "Times New Roman", serif;
+            color: var(--ink);
+            background:
+                radial-gradient(circle at top left, rgba(47, 133, 90, 0.14), transparent 34%),
+                radial-gradient(circle at right 20%, rgba(197, 48, 48, 0.1), transparent 26%),
+                linear-gradient(135deg, #f8f3eb 0%, #efe4d2 100%);
+        }
+
+        .shell {
+            width: min(900px, calc(100% - 32px));
+            margin: 32px auto;
+            padding: 28px;
+            background: rgba(255, 250, 242, 0.88);
+            border: 1px solid rgba(230, 220, 203, 0.9);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(8px);
+        }
+
+        .eyebrow {
+            font-size: 0.8rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin: 0 0 10px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(2.2rem, 6vw, 4rem);
+            line-height: 0.95;
+        }
+
+        .summary {
+            margin: 14px 0 24px;
+            color: var(--muted);
+            max-width: 60ch;
+        }
+
+        .panel {
+            padding: 18px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.72);
+            margin-bottom: 18px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .form-row .prefix-input {
+            flex: 0 1 180px;
+            min-width: 140px;
+        }
+
+        input[type="text"] {
+            flex: 1 1 320px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            font: inherit;
+            background: #fff;
+        }
+
+        button {
+            border: 0;
+            border-radius: 14px;
+            padding: 14px 18px;
+            font: inherit;
+            cursor: pointer;
+            background: var(--accent);
+            color: #fff;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        button:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+        }
+
+        .todos {
+            display: grid;
+            gap: 12px;
+        }
+
+        .todo {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: #fff;
+        }
+
+        .todo.completed .title {
+            text-decoration: line-through;
+            color: var(--muted);
+        }
+
+        .title {
+            font-size: 1.05rem;
+        }
+
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .prefix-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            border: 1px solid #c7d2fe;
+            background: #eef2ff;
+            color: #3730a3;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .meta {
+            margin-top: 4px;
+            font-size: 0.88rem;
+            color: var(--muted);
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .actions button {
+            padding: 10px 14px;
+            background: #374151;
+        }
+
+        .actions .danger {
+            background: var(--danger);
+        }
+
+        .empty {
+            color: var(--muted);
+            padding: 14px 0 0;
+        }
+
+        @media (max-width: 640px) {
+            .shell {
+                width: min(100% - 20px, 900px);
+                margin: 10px auto;
+                padding: 18px;
+                border-radius: 22px;
+            }
+
+            .todo {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .actions {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <p class="eyebrow">Simple Django todo list</p>
+        <h1>Tasks with middleware</h1>
+        <p class="summary">
+            Add, complete, or remove tasks. The request is annotated by middleware, and the blocked path returns a 403.
+        </p>
+
+        <section class="panel">
+            <form class="form-row" method="post" action="{% url 'todo-list' %}">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add">
+                <input class="prefix-input" type="text" name="prefix" placeholder="Prefix (optional)">
+                <input type="text" name="title" placeholder="Write a new todo" required>
+                <button type="submit">Add todo</button>
+            </form>
+            <p class="meta">Request source set by middleware: {{ request_source }}</p>
+            <p class="meta">Current prefix value: {{ request_prefix }}</p>
+        </section>
+
+        <section class="todos">
+            {% for todo in todos %}
+                <article class="todo {% if todo.completed %}completed{% endif %}">
+                    <div>
+                        <div class="title-row">
+                            <span class="prefix-badge">{{ todo.prefix }}</span>
+                            <div class="title">{{ todo.title }}</div>
+                        </div>
+                        <div class="meta">Created {{ todo.created_at }}</div>
+                    </div>
+                    <div class="actions">
+                        <form method="post" action="{% url 'todo-list' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="toggle">
+                            <input type="hidden" name="todo_id" value="{{ todo.id }}">
+                            <button type="submit">{% if todo.completed %}Undo{% else %}Done{% endif %}</button>
+                        </form>
+                        <form method="post" action="{% url 'todo-list' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="todo_id" value="{{ todo.id }}">
+                            <button class="danger" type="submit">Delete</button>
+                        </form>
+                    </div>
+                </article>
+            {% empty %}
+                <p class="empty">No todos yet. Add the first one above.</p>
+            {% endfor %}
+        </section>
+    </main>
+</body>
+</html>
